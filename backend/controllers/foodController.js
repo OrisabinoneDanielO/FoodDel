@@ -10,7 +10,6 @@ const addFood = async (req, res) => {
         price:req.body.price,
         category:req.body.category,
         image:image_filename
-        
     })
     try{
         await food.save();
@@ -31,16 +30,25 @@ const listFood = async (req, res) => {
     }
 }
 //remove food item
-const removeFood =async (req,res)=>{
+const removeFood = async (req, res) => {
     try {
         const food = await foodModel.findById(req.body.id);
-        fs.unlink(`uploads/${food.image}`, () => {})
+        if (!food) {
+            return res.json({ success: false, message: "Food item not found" });
+        }
+
+        if (food.image) {
+            fs.unlink(`uploads/${food.image}`, (error) => {
+                if (error) console.log(error);
+            });
+        }
 
         await foodModel.findByIdAndDelete(req.body.id);
-        res.json({success:true,message:"Food item removed successfully"})
+        res.json({ success: true, message: "Food item removed successfully" });
     } catch (error) {
-        console.log(error)
-        res.json({success:false,message:"Food item not removed"})
+        console.log(error);
+        res.json({ success: false, message: "Food item not removed" });
     }
-}
-export {addFood,listFood}
+};
+
+export { addFood, listFood, removeFood };
